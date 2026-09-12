@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Unitree Telemetry Dashboard</title>
+
+  <link rel="stylesheet" href="dashboard.css">
+
+  <!-- Chart.js para los gráficos históricos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <!-- ==============================
+       HEADER
+       ============================== -->
+
+  <header class="topbar">
+
+    <div class="brand">
+      <div class="brand-mark">U</div>
+
+      <div>
+        <h1>Unitree Telemetry</h1>
+        <span>Dashboard de monitoreo</span>
+      </div>
+    </div>
+
+    <div class="topbar-status">
+
+      <div class="status-item">
+        <span class="status-label">Robot</span>
+        <strong id="robotModel">--</strong>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">Motores</span>
+        <strong id="motorCount">--</strong>
+      </div>
+
+      <div class="connection" id="connectionIndicator">
+        <span class="connection-dot"></span>
+
+        <div>
+          <span class="status-label">Estado</span>
+          <strong id="connectionStatus">Desconectado</strong>
+          <small id="connectionDetail">Esperando conexión</small>
+        </div>
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ==============================
+       CONTENIDO PRINCIPAL
+       ============================== -->
+
+  <main class="dashboard">
+
+    <!-- Resumen superior -->
+
+    <section class="summary-grid">
+
+      <article class="summary-card">
+        <span class="summary-label">Última actualización</span>
+        <strong id="lastUpdate">--</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Temperatura máxima</span>
+        <strong id="maxTemperature">-- °C</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Batería</span>
+        <strong id="summaryBattery">-- %</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Muestras capturadas</span>
+        <strong id="sampleCount">0</strong>
+      </article>
+
+    </section>
+
+
+    <!-- ==============================
+         MOTORES
+         ============================== -->
+
+    <section class="panel panel-motors">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="eyebrow">Actuadores</span>
+          <h2>Motores</h2>
+        </div>
+
+        <div class="temperature-legend">
+          <span><i class="temp-dot temp-ok"></i> &lt; 40 °C</span>
+          <span><i class="temp-dot temp-warning"></i> 40–60 °C</span>
+          <span><i class="temp-dot temp-danger"></i> &gt; 60 °C</span>
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="motor-table">
+
+          <thead>
+            <tr>
+              <th>Motor</th>
+              <th>Temperatura</th>
+              <th>Ángulo</th>
+              <th>Velocidad</th>
+              <th>Torque</th>
+            </tr>
+          </thead>
+
+          <tbody id="motorTableBody">
+            <tr>
+              <td colspan="5" class="empty-state">
+                Esperando datos del robot...
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         IMU
+         ============================== -->
+
+    <section class="panel">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="eyebrow">Orientación</span>
+          <h2>IMU</h2>
+        </div>
+
+      </div>
+
+      <div class="imu-values">
+
+        <div class="imu-value">
+          <span>Roll</span>
+          <strong id="roll">--°</strong>
+        </div>
+
+        <div class="imu-value">
+          <span>Pitch</span>
+          <strong id="pitch">--°</strong>
+        </div>
+
+        <div class="imu-value">
+          <span>Yaw</span>
+          <strong id="yaw">--°</strong>
+        </div>
+
+      </div>
+
+      <div class="chart-container">
+        <canvas id="imuChart"></canvas>
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         BMS
+         ============================== -->
+
+    <section class="panel">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="eyebrow">Sistema de energía</span>
+          <h2>Batería</h2>
+        </div>
+
+      </div>
+
+      <div class="battery-main">
+
+        <div class="battery-level">
+
+          <div class="battery-info">
+            <span>Nivel de carga</span>
+            <strong id="batterySoc">--%</strong>
+          </div>
+
+          <div class="battery-bar">
+            <div
+              id="batteryBarFill"
+              class="battery-bar-fill"
+            ></div>
+          </div>
+
+        </div>
+
+        <div class="battery-metrics">
+
+          <div>
+            <span>Corriente</span>
+            <strong id="batteryCurrent">-- mA</strong>
+          </div>
+
+          <div>
+            <span>Temperatura</span>
+            <strong id="batteryTemperature">-- °C</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <h3 class="subheading">Voltaje por celda</h3>
+
+      <div
+        id="batteryCells"
+        class="battery-cells"
+      >
+        <span class="muted">Esperando datos...</span>
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         FUERZAS / CONTACTOS
+         ============================== -->
+
+    <section class="panel">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="eyebrow">Contacto</span>
+          <h2>Apoyos del robot</h2>
+        </div>
+
+      </div>
+
+      <p class="panel-description" id="forceDescription">
+        Estado de contacto informado por el robot.
+      </p>
+
+      <div
+        id="forceIndicators"
+        class="force-grid"
+      >
+        <span class="muted">Esperando datos...</span>
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         TEMPERATURA HISTÓRICA
+         ============================== -->
+
+    <section class="panel panel-wide">
+
+      <div class="panel-header">
+
+        <div>
+          <span class="eyebrow">Histórico</span>
+          <h2>Temperatura de motores</h2>
+        </div>
+
+        <span class="panel-note" id="temperatureChartNote">
+          4 motores monitoreados
+        </span>
+
+      </div>
+
+      <div class="chart-container chart-large">
+        <canvas id="temperatureChart"></canvas>
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         CAPTURA
+         ============================== -->
+
+    <section class="capture-panel">
+
+      <div>
+
+        <span class="eyebrow">Sesión actual</span>
+        <h2>Captura de telemetría</h2>
+
+        <p>
+          Guardá estados puntuales del robot y exportalos
+          posteriormente como CSV.
+        </p>
+
+      </div>
+
+      <div class="capture-actions">
+
+        <button
+          id="captureButton"
+          class="button button-primary"
+          type="button"
+        >
+          Capturar muestra
+        </button>
+
+        <button
+          id="exportButton"
+          class="button button-secondary"
+          type="button"
+          disabled
+        >
+          Exportar CSV
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+    Desarrollo de Aplicaciones II · TP05 · Telemetría Unitree
+  </footer>
+
+
+  <script src="dashboard.js"></script>
+
+</body>
+</html>
