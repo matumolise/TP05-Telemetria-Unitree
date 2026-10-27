@@ -2,7 +2,7 @@
 // CONFIGURACIÓN
 // ==============================
 
-const API_BASE = 'http://192.168.1.10:8001';
+const API_BASE = 'http://127.0.0.1:8001';
 
 const WS_URL =
   API_BASE.replace('http://', 'ws://') + '/ws';
